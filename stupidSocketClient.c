@@ -54,6 +54,21 @@ int32_t udp_client_init(const char* server_ip, const int server_port)
     return stupid_client.fd;
 }
 
+static void client_deinit(int32_t fd)
+{
+    close(fd);
+}
+
+void tcp_client_deinit(int32_t fd)
+{
+    client_deinit(fd);
+}
+
+void udp_client_deinit(int32_t fd)
+{
+    client_deinit(fd);
+}
+
 int32_t udp_client_send(int32_t fd, const void* buf, const int32_t len)
 {
     int32_t ret;
