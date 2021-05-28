@@ -23,6 +23,7 @@ int32_t tcp_client_init(const char* server_ip, const int server_port);
 int32_t udp_client_init(const char* server_ip, const int server_port);
 void tcp_client_deinit(int32_t fd);
 void udp_client_deinit(int32_t fd);
+int32_t tcp_client_send(int32_t fd, const void* buf, const int32_t len);
 int32_t udp_client_send(int32_t fd, const void* buf, const int32_t len);
 
 #endif
