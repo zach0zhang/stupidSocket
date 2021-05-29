@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
@@ -149,6 +151,18 @@ int32_t tcp_client_send(int32_t fd, const void* buf, const int32_t len)
     return ret;
 }
 
+int32_t tcp_client_recv(int32_t fd, void* const buf, const int32_t len)
+{
+    int32_t ret;
+    if (fd <= 0 || buf == NULL || len <= 0) {
+        _log("%s: bad param\n", __func__);
+        return BAD_PARAM;
+    }   
+
+    ret = recv(fd, buf, len, 0);
+    return ret;
+}
+
 int32_t udp_client_send(int32_t fd, const void* buf, const int32_t len)
 {
     int32_t ret;
@@ -165,5 +179,30 @@ int32_t udp_client_send(int32_t fd, const void* buf, const int32_t len)
     }
     ret = sendto(fd, buf, len, 0, (struct sockaddr*)&stupid_client->server_addr,sizeof(stupid_client->server_addr));
     return ret;
+}
+
+int32_t udp_client_recv(int32_t fd, void* const buf, const int32_t len, int8_t* const from_addr, int32_t* const from_port)
+{
+    int32_t ret;
+    stupid_client_t *stupid_client;
+    struct sockaddr_in addr;
+    socklen_t addr_len = sizeof(addr);
+    if (fd <= 0 || buf == NULL || len <= 0 || from_addr == NULL || from_port== NULL) {
+        _log("%s: bad param\n", __func__);
+        return BAD_PARAM;
+    }
+
+    stupid_client = find_stupid_client(fd);
+    if (stupid_client == NULL) {
+        _log("%s: fd is not exist\n", __func__);
+        return ERROR_COMMOND;
+    }
+
+    
+    ret = recvfrom(fd, buf, len, 0, (struct sockaddr*)&addr, &addr_len);
+    sprintf(from_addr, "%s", inet_ntoa(addr.sin_addr));
+    *from_port = ntohs(addr.sin_port);
+    return ret;
+
 }
 
